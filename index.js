@@ -25,19 +25,53 @@ let persons = [
   },
 ];
 
-app.get("/", (req, res) => {
-  res.send("<h1>Hello World!</h1>");
-});
-
 app.get("/api/persons", (req, res) => {
   res.json(persons);
 });
 
+app.get("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const person = persons.find((p) => p.id === id);
+  if (person) {
+    res.json(person);
+  } else {
+    res.status(404).end();
+  }
+});
+
+app.delete("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  persons = persons.filter((p) => p.id !== id);
+  res.status(204).end();
+});
+
+app.post("/api/persons", (req, res) => {
+  const body = req.body;
+
+  if (!body.name) {
+    return res.status(400).json({ error: "Name is missing" }).end();
+  }
+  if (!body.number) {
+    return res.status(400).json({ error: "Number is missing" }).end();
+  }
+  if (persons.find((p) => p.name === body.name)) {
+    return res.status(400).json({ error: "Name exists already" }).end();
+  }
+
+  const id = Math.round(Math.random() * 10000);
+  const person = {
+    name: body.name,
+    number: body.number,
+    id,
+  };
+  persons = persons.concat(person);
+  res.json(person);
+});
+
 app.get("/info", (req, res) => {
-  console.log("req", req.params)
   const time = new Date();
-  const weekday = time.toLocaleString('default', { weekday: 'short' });
-  const month = time.toLocaleString('default', { month: 'short' });
+  const weekday = time.toLocaleString("default", { weekday: "short" });
+  const month = time.toLocaleString("default", { month: "short" });
   res.send(`<div>
   <p>Phonebook has info for ${persons.length} people</p>
   <p>
@@ -53,4 +87,3 @@ const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
