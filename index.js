@@ -25,11 +25,32 @@ let persons = [
   },
 ];
 
+app.get("/", (req, res) => {
+  res.send("<h1>Hello World!</h1>");
+});
+
 app.get("/api/persons", (req, res) => {
   res.json(persons);
+});
+
+app.get("/info", (req, res) => {
+  console.log("req", req.params)
+  const time = new Date();
+  const weekday = time.toLocaleString('default', { weekday: 'short' });
+  const month = time.toLocaleString('default', { month: 'short' });
+  res.send(`<div>
+  <p>Phonebook has info for ${persons.length} people</p>
+  <p>
+  ${weekday} 
+  ${month} 
+  ${time.getDate()} 
+  ${time.getFullYear()} 
+  ${time.toTimeString()}</p>
+  </div>`);
 });
 
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
