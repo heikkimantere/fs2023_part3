@@ -1,1 +1,1 @@
-App runs here: proud-haze-2625.fly.dev/api/persons
+App runs here: proud-haze-2625.fly.dev
