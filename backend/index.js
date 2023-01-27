@@ -4,24 +4,13 @@ const morgan = require("morgan");
 const cors = require("cors");
 const Person = require("./models/person");
 
-const formatRequest = (tokens, req, res) => {
-  return [
-    tokens.method(req, res),
-    tokens.url(req, res),
-    tokens.status(req, res),
-    tokens.res(req, res, "content-length"),
-    "-",
-    tokens["response-time"](req, res),
-    "ms",
-    JSON.stringify(req.body),
-  ].join(" ");
-};
+const { errorHandler, formatter } = require("./middleware");
 
 const app = express();
-app.use(express.json());
 app.use(express.static("build"));
+app.use(express.json());
 app.use(cors());
-app.use(morgan(formatRequest));
+app.use(morgan(formatter));
 
 app.get("/", (req, res) => {
   res.send("<h1>Here we are!</h1>");
@@ -33,10 +22,20 @@ app.get("/api/persons", (request, response) => {
   });
 });
 
-app.get("/api/persons/:id", (req, res) => {
-  Person.findById(req.params.id).then((person) => {
-    res.json(person);
-  });
+app.get("/api/persons/:id", (req, res, next) => {
+  Person.findById(req.params.id)
+    .then((person) => {
+      if (person) {
+        res.json(person);
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch((error) => {
+      console.log("AAAA");
+      console.log(error.name);
+      return next(error);
+    });
 });
 
 app.delete("/api/persons/:id", (req, res) => {
@@ -85,6 +84,8 @@ app.get("/info", (req, res) => {
   </div>`);
   });
 });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT; // || 3001;
 app.listen(PORT, () => {
