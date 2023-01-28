@@ -33,10 +33,17 @@ const App = () => {
       }
     } else {
       const newPerson = { name: newName, number: newNumber };
-      noteUtils.add(newPerson).then((res) => setPersons([...persons, res]));
-      setNewName("");
-      setNewNumber("");
-      showNotification("Person added!");
+      noteUtils
+        .add(newPerson)
+        .then((res) => {
+          setPersons([...persons, res]);
+          setNewName("");
+          setNewNumber("");
+          showNotification("Person added!");
+        })
+        .catch((e) => {
+          showNotification("Error – perhaps name or number is missing?");
+        });
     }
   };
 
@@ -108,6 +115,8 @@ const notificationStyle = {
   borderStyle: "solid",
   display: "inline-block",
   marginBottom: "1rem",
+  position: "absolute",
+  right: "1rem",
 };
 const errorStyle = {
   borderColor: "red",
