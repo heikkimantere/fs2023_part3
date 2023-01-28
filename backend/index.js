@@ -4,7 +4,8 @@ const morgan = require("morgan");
 const cors = require("cors");
 const Person = require("./models/person");
 
-const { errorHandler, formatter } = require("./middleware");
+const { errorHandler, formatter, unknownEndpoint } = require("./middleware");
+const { response } = require("express");
 
 const app = express();
 app.use(express.static("build"));
@@ -31,17 +32,15 @@ app.get("/api/persons/:id", (req, res, next) => {
         res.status(404).end();
       }
     })
-    .catch((error) => {
-      console.log("AAAA");
-      console.log(error.name);
-      return next(error);
-    });
+    .catch((error) => next(error));
 });
 
-app.delete("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  persons = persons.filter((p) => p.id !== id);
-  res.status(204).end();
+app.delete("/api/persons/:id", (req, res, next) => {
+  Person.findByIdAndRemove(req.params.id)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => next(error));
 });
 
 app.post("/api/persons", (req, res) => {
@@ -66,13 +65,26 @@ app.post("/api/persons", (req, res) => {
   });
 });
 
+app.put("/api/persons/:id", (req, res, next) => {
+  const body = req.body;
+  const person = {
+    name: body.name,
+    number: body.number,
+  };
+
+  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+    .then((updatedPerson) => {
+      res.json(updatedPerson);
+    })
+    .catch((error) => next(error));
+});
+
 app.get("/info", (req, res) => {
   const time = new Date();
   const weekday = time.toLocaleString("default", { weekday: "short" });
   const month = time.toLocaleString("default", { month: "short" });
 
   Person.find({}).then((persons) => {
-    console.log(persons.length);
     res.send(`<div>
   <p>Phonebook has info for ${persons.length} people</p>
   <p>
@@ -85,6 +97,7 @@ app.get("/info", (req, res) => {
   });
 });
 
+app.use(unknownEndpoint);
 app.use(errorHandler);
 
 const PORT = process.env.PORT; // || 3001;

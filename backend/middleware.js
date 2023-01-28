@@ -12,7 +12,6 @@ const formatter = (tokens, req, res) => {
 };
 
 const errorHandler = (error, request, response, next) => {
-  console.error("XFJWEHFEWJIREFWJI");
   console.error(error.message);
 
   if (error.name === "CastError") {
@@ -22,4 +21,8 @@ const errorHandler = (error, request, response, next) => {
   next(error);
 };
 
-module.exports = { formatter, errorHandler };
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
+module.exports = { formatter, errorHandler, unknownEndpoint };
