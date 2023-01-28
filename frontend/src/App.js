@@ -42,7 +42,7 @@ const App = () => {
           showNotification("Person added!");
         })
         .catch((e) => {
-          showNotification("Error – perhaps name or number is missing?");
+          showNotification(e.response?.data?.error || "Error adding a name");
         });
     }
   };
@@ -117,6 +117,7 @@ const notificationStyle = {
   marginBottom: "1rem",
   position: "absolute",
   right: "1rem",
+  maxWidth: "50%",
 };
 const errorStyle = {
   borderColor: "red",

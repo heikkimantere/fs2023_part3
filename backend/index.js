@@ -17,9 +17,9 @@ app.get("/", (req, res) => {
   res.send("<h1>Here we are!</h1>");
 });
 
-app.get("/api/persons", (request, response) => {
+app.get("/api/persons", (req, res) => {
   Person.find({}).then((persons) => {
-    response.json(persons);
+    res.json(persons);
   });
 });
 
@@ -43,36 +43,32 @@ app.delete("/api/persons/:id", (req, res, next) => {
     .catch((error) => next(error));
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
   const body = req.body;
 
-  if (!body.name) {
-    return res.status(400).json({ error: "Name is missing" }).end();
-  }
-  if (!body.number) {
-    return res.status(400).json({ error: "Number is missing" }).end();
-  }
   const person = new Person({
     name: body.name,
     number: body.number,
   });
 
-  person.save().then((savedPerson) => {
-    console.log(
-      `added ${savedPerson.name} number ${savedPerson.number} to phonebook`
-    );
-    res.json(savedPerson);
-  });
+  person
+    .save()
+    .then((savedPerson) => {
+      console.log(
+        `added ${savedPerson.name} number ${savedPerson.number} to phonebook`
+      );
+      res.json(savedPerson);
+    })
+    .catch((error) => next(error));
 });
 
 app.put("/api/persons/:id", (req, res, next) => {
-  const body = req.body;
-  const person = {
-    name: body.name,
-    number: body.number,
-  };
-
-  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+  const { name, number } = req.body;
+  Person.findByIdAndUpdate(
+    req.params.id,
+    { name, number },
+    { new: true, runValidators: true, context: "query" }
+  )
     .then((updatedPerson) => {
       res.json(updatedPerson);
     })
