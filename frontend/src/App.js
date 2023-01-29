@@ -49,7 +49,7 @@ const App = () => {
 
   const showNotification = (msg) => {
     setNotification(msg);
-    setTimeout(() => setNotification(""), 3000);
+    setTimeout(() => setNotification(""), 5000);
   };
 
   const deletePerson = (id) => {
